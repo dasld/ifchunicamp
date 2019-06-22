@@ -1,0 +1,91 @@
+%%
+%% Customizações do abnTeX2 (http://www.abntex.net.br/) para dissertações e teses do IFCH/Unicamp
+%%
+%% This work may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either version 1.3
+%% of this license or (at your option) any later version.
+%% The latest version of this license is in
+%%   http://www.latex-project.org/lppl.txt
+%% and version 1.3 or later is part of all distributions of LaTeX
+%% version 2005/12/01 or later.
+%%
+%% This work has the LPPL maintenance status `maintained'.
+%%
+%% The Current Maintainer of this work is Daniel Alves da Silva Lopes Diniz, diniz.cpm <at> gmail.com
+%%
+%% Further information about abnTeX2 are available on http://www.abntex.net.br/
+%%
+
+% ---
+% INICIO DAS CUSTOMIZAÇÔES PARA O IFCH/UNICAMP
+% ---
+
+% Este pacote procura alterar a capa e a folha de rosto da classe abnTeX2 de modo a
+% ficarem compatíveis com as normas para Dissertações e Teses do IFCH/Unicamp.
+% Essas normas estão disponíveis em
+% https://www.ifch.unicamp.br/ifch/pf-ifch/public-files/pos/procedimentos/manual_defesa_v29_2018.pdf
+% (acesso em 22/06/2019).
+
+\ProvidesPackage{ifchunicamp}[2019/06/22 Criacao desta customizacao do abnTeX2]
+\RequirePackage[utf8]{inputenc}                 % este documento deve ser lido em UTF-8
+%\RequirePackage{textpos}
+\RequirePackage{bookmark}
+
+% alterando a capa
+\renewcommand{\imprimircapa}{%
+\pdfbookmark{Capa}{capa}                        % cf. abntex2.pdf pag13 pra mais informações
+\begin{capa}%
+    \flushleft
+    \includegraphics[height=2.5\baselineskip]{logo.pdf}
+
+%\begin{minipage}{\linewidth}
+\centering\sffamily\ABNTEXchapterfont\Large%
+\textbf{\MakeUppercase{\imprimirinstituicao}}
+%\end{minipage}
+
+\vspace*{3\baselineskip}
+{\ABNTEXchapterfont\large\MakeUppercase{\imprimirautor}}
+\vfill
+\ABNTEXchapterfont\bfseries\LARGE\MakeUppercase{\imprimirtitulo}
+\vfill
+\large\MakeUppercase{\imprimirlocal}\\
+\imprimirdata
+\end{capa}
+}
+
+%-------------------------------------------------------------------------------
+
+% folha de rosto
+\makeatletter
+\renewcommand{\folhaderostocontent}{%
+\centering
+{\ABNTEXchapterfont\rmfamily\large\MakeUppercase{\imprimirautor}}
+
+\vfill
+{\ABNTEXchapterfont\bfseries\Large\MakeUppercase{\imprimirtitulo}}
+
+\vfill
+\abntex@ifnotempty{\imprimirpreambulo}{%
+\hspace*{.49\textwidth}
+\begin{minipage}{.5\textwidth}
+\SingleSpacing\imprimirpreambulo
+\end{minipage}%
+}
+\flushleft
+{\textit\imprimirorientadorRotulo}:\enspace\imprimirorientador\\
+{\textit\imprimircoorientadorRotulo}:\enspace\imprimircoorientador
+
+\vspace*{2cm}
+\begin{minipage}{.45\textwidth}\small\MakeUppercase{%
+Este exemplar corresponde à versão final da dissertação defendida pelo aluno \imprimirautor, orientada por \imprimirorientador\ e coorientada por \imprimircoorientador.%
+}\end{minipage}%
+\vfill%
+\centering\large\bfseries
+\MakeUppercase{\imprimirlocal}\\
+\MakeUppercase{\imprimirdata}%
+}
+\makeatother
+
+% ---
+% FIM DAS CUSTOMIZAÇÔES
+% ---
