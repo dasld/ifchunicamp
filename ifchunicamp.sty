@@ -26,65 +26,91 @@
 % https://www.ifch.unicamp.br/ifch/pf-ifch/public-files/pos/procedimentos/manual_defesa_v29_2018.pdf
 % (acesso em 22/06/2019).
 
-\ProvidesPackage{ifchunicamp}[2019/06/22 Criacao desta customizacao do abnTeX2]
+\ProvidesPackage{ifchunicamp}[2020/02/19]
 \RequirePackage[utf8]{inputenc}                 % este documento deve ser lido em UTF-8
-%\RequirePackage{textpos}
+%\RequirePackage{tikz}
 \RequirePackage{bookmark}
 
-% alterando a capa
+
+% baseado em https://github.com/abntex/abntex2/blob/master/tex/latex/abntex2/abntex2.cls#L694
+\providecommand{\thesubtitulo}[1]{}
+\newcommand{\subtitulo}[1]{\renewcommand{\thesubtitulo}{#1}}
+\newcommand{\imprimirsubtitulo}{\thesubtitulo}
+
 \renewcommand{\imprimircapa}{%
-\pdfbookmark{Capa}{capa}                        % cf. abntex2.pdf pag13 pra mais informações
-\begin{capa}%
-    \flushleft
-    \includegraphics[height=2.5\baselineskip]{logo.pdf}
+\pdfbookmark{Capa}{capa}% cf. abntex2.pdf p13 pra mais informações
+\begin{capa}
+\setlength{\parindent}{0cm}
+% altura mínima: 10 mm
+% altura máxima em papel A4: 17,82mm (6% de 297mm)
+% https://www.unicamp.br/unicamp/logotipo
+% https://tex.stackexchange.com/a/244103/90645
+%\begin{tikzpicture}[remember picture,overlay]
+%  \node[xshift=3cm,yshift=-3cm,anchor=south east] at (current page.north west){%
+%  \includegraphics[height=15mm]{logo.pdf}};%2.5\onelineskip
+%\end{tikzpicture}
+% 13,91mm é a média entre as alturas mínima e máxima
+\includegraphics[height=13.91mm]{logo.pdf}
 
-%\begin{minipage}{\linewidth}
-\centering\sffamily\ABNTEXchapterfont\Large%
-\textbf{\MakeUppercase{\imprimirinstituicao}}
-%\end{minipage}
+\centering\ABNTEXchapterfont%
+\textbf{\Large\MakeUppercase{\imprimirinstituicao}}
 
-\vspace*{3\baselineskip}
-{\ABNTEXchapterfont\large\MakeUppercase{\imprimirautor}}
-\vfill
-\ABNTEXchapterfont\bfseries\LARGE\MakeUppercase{\imprimirtitulo}
-\vfill
-\large\MakeUppercase{\imprimirlocal}\\
+\vspace*{3\onelineskip}%
+{\large\MakeUppercase{\imprimirautor}}
+
+\vfill%
+\begin{center}
+  \LARGE%
+  \textbf{\MakeUppercase{\imprimirtitulo}}:
+
+  \MakeUppercase{\imprimirsubtitulo}
+\end{center}
+
+\vfill%
+\large%
+\MakeUppercase{\imprimirlocal}\\
 \imprimirdata
 \end{capa}
 }
 
 %-------------------------------------------------------------------------------
-
 % folha de rosto
-\makeatletter
 \renewcommand{\folhaderostocontent}{%
-\centering
-{\ABNTEXchapterfont\rmfamily\large\MakeUppercase{\imprimirautor}}
+\setlength{\parindent}{0cm}%
+\centering%
+{\rmfamily\large\MakeUppercase{\imprimirautor}}
 
-\vfill
-{\ABNTEXchapterfont\bfseries\Large\MakeUppercase{\imprimirtitulo}}
+\vfill%
+\begin{center}
+\ABNTEXchapterfont\Large%
+  \MakeUppercase{\imprimirtitulo}:
 
-\vfill
+  \MakeUppercase{\imprimirsubtitulo}
+\end{center}
+
+\vfill%
 \abntex@ifnotempty{\imprimirpreambulo}{%
-\hspace*{.49\textwidth}
+\strut\hfill%
 \begin{minipage}{.5\textwidth}
 \SingleSpacing\imprimirpreambulo
 \end{minipage}%
 }
-\flushleft
-{\textit\imprimirorientadorRotulo}:\enspace\imprimirorientador\\
-{\textit\imprimircoorientadorRotulo}:\enspace\imprimircoorientador
+\flushleft%
+\vspace*{\onelineskip}%
+\textit{\imprimirorientadorRotulo}:\enspace\imprimirorientador\\
+\textit{\imprimircoorientadorRotulo}:\enspace\imprimircoorientador
 
-\vspace*{2cm}
-\begin{minipage}{.45\textwidth}\small\MakeUppercase{%
+\vspace*{2cm}%
+\begin{minipage}{.5\textwidth}
+\small\MakeUppercase{%
 Este exemplar corresponde à versão final da dissertação defendida pelo aluno \imprimirautor, orientada por \imprimirorientador\ e coorientada por \imprimircoorientador.%
 }\end{minipage}%
+
 \vfill%
-\centering\large\bfseries
+\centering\large%\bfseries%
 \MakeUppercase{\imprimirlocal}\\
-\MakeUppercase{\imprimirdata}%
+\imprimirdata%
 }
-\makeatother
 
 % ---
 % FIM DAS CUSTOMIZAÇÔES
