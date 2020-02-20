@@ -1,7 +1,7 @@
 # ifchunicamp
 Este pacote visa a alterar a capa e a folha de rosto da classe abnTeX2 de modo a ficarem compatíveis com as normas para
 Dissertações e Teses do IFCH/Unicamp.
-As normas consultadas são as disponíveis [no site do IFCH/Unicamp](https://www.ifch.unicamp.br/ifch/pf-ifch/public-files/pos/procedimentos/manual_defesa_v29_2018.pdf) (acesso em 22/06/2019).
+A norma consultada é a versão versão 30/2020, disponível [no site do IFCH/Unicamp](https://www.ifch.unicamp.br/ifch/pos/formularios) (acesso em 19/02/2020).
 
 Essa customização da classe abnTeX2 procura seguir as diretrizes especificadas [aqui](https://github.com/abntex/abntex2/wiki/ComoCustomizar).
 
@@ -18,4 +18,4 @@ Por exemplo, se o arquivo `.tex` a ser compilado está em `/home/user/` e `logo.
 Observe as duplas chaves.
 Mais informações podem ser encontradas [no CTAN](http://ctan.dcc.uchile.cl/macros/latex/required/graphics/grfguide.pdf).
 
-Dúvidas podem ser enviadas a `diniz.cpm <at> gmail.com`
+Dúvidas podem ser enviadas a `daniel_asl_diniz <at> protonmail.com`
