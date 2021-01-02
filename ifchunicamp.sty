@@ -26,9 +26,8 @@
 % https://www.ifch.unicamp.br/ifch/pf-ifch/public-files/pos/procedimentos/manual_defesa_v29_2018.pdf
 % (acesso em 22/06/2019).
 
-\ProvidesPackage{ifchunicamp}[2020/02/19]
+\ProvidesPackage{ifchunicamp}[2021/01/02]
 \RequirePackage[utf8]{inputenc}                 % este documento deve ser lido em UTF-8
-%\RequirePackage{tikz}
 \RequirePackage{bookmark}
 
 
@@ -40,32 +39,35 @@
 \renewcommand{\imprimircapa}{%
 \pdfbookmark{Capa}{capa}% cf. abntex2.pdf p13 pra mais informações
 \begin{capa}
-\setlength{\parindent}{0cm}
-% altura mínima: 10 mm
-% altura máxima em papel A4: 17,82mm (6% de 297mm)
-% https://www.unicamp.br/unicamp/logotipo
-% https://tex.stackexchange.com/a/244103/90645
-%\begin{tikzpicture}[remember picture,overlay]
-%  \node[xshift=3cm,yshift=-3cm,anchor=south east] at (current page.north west){%
-%  \includegraphics[height=15mm]{logo.pdf}};%2.5\onelineskip
-%\end{tikzpicture}
+  \setlength{\parindent}{0pt}%
+% LOGOTIPO
 % 13,91mm é a média entre as alturas mínima e máxima
+% permitidas pela Unicamp para seu logotipo
 \includegraphics[height=13.91mm]{logo.pdf}
 
-\centering\ABNTEXchapterfont%
-\textbf{\Large\MakeUppercase{\imprimirinstituicao}}
+\centering%
+\ABNTEXchapterfont%
 
+% INSTITUIÇÃO
+%\MakeUppercase{}% doesn't work here anymore! why?
+\textbf{\Large\imprimirinstituicao}
+
+% AUTOR
 \vspace*{3\onelineskip}%
-{\large\MakeUppercase{\imprimirautor}}
+\MakeUppercase{\large\imprimirautor}
 
+% TÍTULO
 \vfill%
-\begin{center}
-  \LARGE%
-  \textbf{\MakeUppercase{\imprimirtitulo}}:
+% vplace é definido por memoir
+% the optional argument specifies the ratio of the upper space to the lower space
+\begin{vplace}[0]
+  \centering\LARGE%
+  \MakeUppercase{\bfseries\imprimirtitulo}:
 
   \MakeUppercase{\imprimirsubtitulo}
-\end{center}
+\end{vplace}
 
+% LOCAL E DATA
 \vfill%
 \large%
 \MakeUppercase{\imprimirlocal}\\
@@ -76,37 +78,45 @@
 %-------------------------------------------------------------------------------
 % folha de rosto
 \renewcommand{\folhaderostocontent}{%
-\setlength{\parindent}{0cm}%
+  \setlength{\parindent}{0cm}%
 \centering%
-{\rmfamily\large\MakeUppercase{\imprimirautor}}
+\rmfamily%
+% AUTOR
+\MakeUppercase{\large\imprimirautor}
 
-\vfill%
-\begin{center}
+% TÍTULO
+\vspace*{\stretch{4}}%
+\begin{vplace}[0]
+\begingroup%
 \ABNTEXchapterfont\Large%
-  \MakeUppercase{\imprimirtitulo}:
+\MakeUppercase{\imprimirtitulo}:
 
-  \MakeUppercase{\imprimirsubtitulo}
-\end{center}
+\MakeUppercase{\imprimirsubtitulo}%
+\endgroup
 
-\vfill%
+% PREÂMBULO
+\vspace*{\stretch{3}}%
 \abntex@ifnotempty{\imprimirpreambulo}{%
-\strut\hfill%
-\begin{minipage}{.5\textwidth}
-\SingleSpacing\imprimirpreambulo
-\end{minipage}%
+\hspace*{\fill}%
+\parbox{.5\textwidth}{\SingleSpacing\imprimirpreambulo}%
 }
+
 \flushleft%
-\vspace*{\onelineskip}%
+% ORIENTAÇÃO
+\vspace*{\stretch{1}}%
 \textit{\imprimirorientadorRotulo}:\enspace\imprimirorientador\\
 \textit{\imprimircoorientadorRotulo}:\enspace\imprimircoorientador
 
-\vspace*{2cm}%
-\begin{minipage}{.5\textwidth}
-\small\MakeUppercase{%
-Este exemplar corresponde à versão final da dissertação defendida pelo aluno \imprimirautor, orientada por \imprimirorientador\ e coorientada por \imprimircoorientador.%
-}\end{minipage}%
+% VERSÃO FINAL
+\vspace*{\stretch{2}}%
+\parbox{.5\textwidth}{\MakeUppercase{\ABNTEXfontereduzida%
+    Este exemplar corresponde à versão final da tese defendida pelo aluno \imprimirautor,
+    orientada por \imprimirorientador.%
+}}
+\end{vplace}
 
-\vfill%
+\vspace*{\stretch{4}}%
+% LOCAL E DATA
 \centering\large%\bfseries%
 \MakeUppercase{\imprimirlocal}\\
 \imprimirdata%
