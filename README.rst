@@ -81,9 +81,8 @@ e o campo ``<NOME DO ORIENTADOR>``, pela macro
 ``\orientador``.
 
 Por exemplo,
-o código abaixo:
+o código abaixo::
 
-.. code:: TeX
     \usepackage{ifchunicamp}
     \titulo{Provisório}
     \subtitulo{provisório}
