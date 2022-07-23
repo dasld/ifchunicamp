@@ -41,10 +41,19 @@
   {\PassOptionsToPackage{pdftex}{graphicx}}
   {\RequirePackage[pdftex]{graphicx}}
 
-% baseado em https://github.com/abntex/abntex2/blob/master/tex/latex/abntex2/abntex2.cls#L694
-\providecommand{\thesubtitulo}[1]{}
-\newcommand{\subtitulo}[1]{\renewcommand{\thesubtitulo}{#1}}
-\newcommand{\imprimirsubtitulo}{\thesubtitulo}
+
+
+% -- subtítulo
+% https://github.com/abntex/abntex2/blob/f0a4d3c8589f0f2e7c087880f0816debda036eb4/tex/latex/abntex2/abntex2.cls#L697
+\newcommand{\imprimirsubtitulo}{}
+\newcommand{\subtitulo}[1]{\renewcommand{\imprimirsubtitulo}{#1}}
+\newcommand{\imprimirsubtitulo@ifchunicamp}{%
+  \abntex@ifnotempty{\imprimirsubtitulo}{%
+    {:}\par\MakeUppercase{\imprimirsubtitulo}
+  }%
+}
+
+
 
 % -- opção "semlogo"
 % 13,91mm é a média entre as alturas mínima e máxima
@@ -108,9 +117,8 @@
 % "the optional argument specifies the ratio of the upper space to the lower space"
 \begin{vplace}[0]
   \centering\LARGE%
-  \MakeUppercase{\bfseries\imprimirtitulo}:
-  \par
-  \MakeUppercase{\imprimirsubtitulo}
+  \MakeUppercase{\bfseries\imprimirtitulo}%
+  \imprimirsubtitulo@ifchunicamp
 \end{vplace}
 
 % LOCAL E DATA
@@ -136,9 +144,8 @@
 \begin{vplace}[0]
 \begingroup%
 \ABNTEXchapterfont\Large%
-\MakeUppercase{\imprimirtitulo}:
-
-\MakeUppercase{\imprimirsubtitulo}%
+  \MakeUppercase{\imprimirtitulo}%
+  \imprimirsubtitulo@ifchunicamp
 \endgroup
 
 % PREÂMBULO
@@ -151,27 +158,10 @@
 \flushleft%
 % ORIENTAÇÃO
 \vspace*{\stretch{1}}%
-% esse "hack" funciona assim:
-% como o coorientador é opcional, as macros
-% \imprimirorientadorRotulo e
-% \imprimirorientador
-% podem expandir para caixas vazias.
-% por isso, vamos setar box0 para ser o nome do coorientador,
-% isto é, \imprimircoorientador
-% se box0 tiver largura positiva (maior que 0pt),
-% imprimimos
-% \textit{\imprimircoorientadorRotulo}:\enspace\box0
-% do contrário, imprimimos apenas um \strut
-% o \strut é necessário por causa da quebra de linha \\ abaixo!
-% sem ele, não haveria uma nova linha pra começar após a quebra
-% \wd0 é a largura da caixa temporária zero
-% \z@ significa 0pt (zero pontos)
-\textit{\imprimirorientadorRotulo}:\enspace\imprimirorientador\\%
-\setbox0=\hbox{\imprimircoorientador}%
-\ifdim\wd0>\z@%
-  \textit{\imprimircoorientadorRotulo}:\enspace\box0
-  \else\strut%
-\fi%
+\textit{\imprimirorientadorRotulo}:\enspace\imprimirorientador
+\abntex@ifnotempty{\imprimircoorientador}{%
+  \newline\textit{\imprimircoorientadorRotulo}:\enspace\imprimircoorientador
+}
 
 % VERSÃO FINAL
 \vspace*{\stretch{2}}%
