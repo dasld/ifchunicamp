@@ -32,6 +32,7 @@
 % e vir no formato YYYY-MM-DD
 \ProvidesPackage{ifchunicamp}[2022/07/17]
 \RequirePackage[utf8]{inputenc}%  este documento deve ser lido em UTF-8
+\RequirePackage{xkeyval}
 % hyperref para o comando \pdfbookmark
 \@ifpackageloaded{hyperref}
   {\PassOptionsToPackage{bookmarksopen=1,unicode}{hyperref}}
@@ -44,12 +45,40 @@
 \providecommand{\thesubtitulo}[1]{}
 \newcommand{\subtitulo}[1]{\renewcommand{\thesubtitulo}{#1}}
 \newcommand{\imprimirsubtitulo}{\thesubtitulo}
+
+% -- opção "semlogo"
 % 13,91mm é a média entre as alturas mínima e máxima
 % permitidas pela Unicamp para seu logotipo
 \newcommand{\logodaunic@mp}{\includegraphics[height=13.91mm]{logo.pdf}}
-\DeclareOption{semlogo}{\def\logodaunic@mp{\empty}}
-\ProcessOptions\relax
+% a linha abaixo permite usar
+% \usepackage[semlogo=?]
+% onde ? é QUALQUER valor, o que eu acho meio estranho,
+% embora pacotes como geometry usem essa convenção.
+% \define@key{capaifch}{semlogo}[]{\def\logodaunic@mp{}}
+% acho mais lógico usar essa outra definição, que
+% permite apenas as sintaxes:
+% \usepackage[semlogo] / \usepackage[semlogo=true] (equivalentes)
+% \usepackage[semlogo=false] (correto, porém inócuo)
+\define@boolkey{capaifch}{semlogo}[true]{\ifstrequal{#1}{true}{\def\logodaunic@mp{}}}
 
+% -- opção "naofinal"
+\newsavebox{\versaofinaldaunic@mpbox}
+\newcommand{\versaofinaldaunic@mp}{\usebox{\versaofinaldaunic@mpbox}}
+\define@boolkey{capaifch}{naofinal}[true]{%
+  \ifstrequal{#1}{true}{%
+    \def\versaofinaldaunic@mp{\phantom{\usebox{\versaofinaldaunic@mpbox}}}%
+  }%
+}
+
+% -- opção "peloaluno"
+\newcommand*{\peloalunounic@mp}{pelo aluno}
+\define@key{capaifch}{peloaluno}{\def\peloalunounic@mp{#1}}
+
+
+% usando \ProcessOptionsX em vez de
+% \ProcessOptions devido ao pacote xkeyval
+% a especificação da família entre <> é obrigatória
+\ProcessOptionsX<capaifch>\relax
 
 
 % == CAPA ==
@@ -61,12 +90,13 @@
 % LOGOTIPO
 \logodaunic@mp
 
-\centering%
-\ABNTEXchapterfont%
+\centering
+\ABNTEXchapterfont
 
 % INSTITUIÇÃO
-%\MakeUppercase{}% não funciona mais aqui! por quê?!
-\textbf{\Large\imprimirinstituicao}
+% \MakeUppercase e \MakeTextUppercase não funcionam (mais?) aqui,
+% mesmo com \expandafter; mas \uppercase (ainda) funciona
+\textbf{\Large\expandafter\uppercase\expandafter{\imprimirinstituicao}}
 
 % AUTOR
 \vspace*{3\onelineskip}%
@@ -79,7 +109,7 @@
 \begin{vplace}[0]
   \centering\LARGE%
   \MakeUppercase{\bfseries\imprimirtitulo}:
-
+  \par
   \MakeUppercase{\imprimirsubtitulo}
 \end{vplace}
 
@@ -137,19 +167,25 @@
 % \wd0 é a largura da caixa temporária zero
 % \z@ significa 0pt (zero pontos)
 \textit{\imprimirorientadorRotulo}:\enspace\imprimirorientador\\%
-\setbox0\hbox{\imprimircoorientador}%
+\setbox0=\hbox{\imprimircoorientador}%
 \ifdim\wd0>\z@%
-  \textit{\imprimircoorientadorRotulo}:\enspace\box0%
+  \textit{\imprimircoorientadorRotulo}:\enspace\box0
   \else\strut%
 \fi%
 
 % VERSÃO FINAL
 \vspace*{\stretch{2}}%
-\parbox{.5\textwidth}{\MakeUppercase{\ABNTEXfontereduzida%
-    Este exemplar corresponde à versão final da tese defendida pelo
-    aluno \imprimirautor,
-    orientada por \imprimirorientador.%
-}}
+\savebox{\versaofinaldaunic@mpbox}{%
+  \parbox{.5\textwidth}{\MakeUppercase{%
+    \ABNTEXfontereduzida
+    Este exemplar corresponde à versão final da tese defendida
+    \peloalunounic@mp\ %
+    \imprimirautor,
+    orientada por
+    \imprimirorientador.%
+  }}%
+}%
+\versaofinaldaunic@mp
 \end{vplace}
 
 \vspace*{\stretch{4}}%
