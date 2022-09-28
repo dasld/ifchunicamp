@@ -44,8 +44,15 @@
 % -- miscelânea
 % o manual do IFCH chama a folha de rosto de "página de rosto"
 \renewcommand{\folhaderostoname}{Página de rosto}
-\newcommand{\@zeroparbox}[1]{%
-  \makebox(0,0){\parbox{\linewidth}{#1}}%
+\newcommand{\@smashedparbox}[1]{%
+  % \smash não tolera argumento contendo \par, então essa macro é mais ou menos
+  % \smash só que sem zerar a largura
+  % baseado em: https://tex.stackexchange.com/a/424204
+  % colocar o conteúdo em uma parbox na box\@tempboxa
+  \setbox\@tempboxa\hbox{\parbox{\linewidth}{#1}}%
+  \ht\@tempboxa\z@% zerar o height da caixa
+  \dp\@tempboxa\z@% zerar o depth da caixa
+  \leavevmode@ifvmode\box\@tempboxa% usar a caixa de fato
 }
 
 
@@ -53,7 +60,7 @@
 % https://github.com/abntex/abntex2/blob/f0a4d3c8589f0f2e7c087880f0816debda036eb4/tex/latex/abntex2/abntex2.cls#L697
 \newcommand{\imprimirsubtitulo}{}
 \newcommand{\subtitulo}[1]{\renewcommand{\imprimirsubtitulo}{#1}}
-\newcommand{\imprimirsubtitulo@ifchunicamp}{%
+\newcommand{\linha@de@subtitulo}{%
   \abntex@ifnotempty{\imprimirsubtitulo}{%
     {:}\par\MakeUppercase{\imprimirsubtitulo}
   }%
@@ -124,10 +131,10 @@
 % vplace é definido pela classe memoir (base de abnTeX2)
 % "the optional argument specifies the ratio of the upper space to the lower space"
 \begin{vplace}[1]
-  \@zeroparbox{%
+  \@smashedparbox{%
     \centering\LARGE
     \MakeUppercase{\bfseries\imprimirtitulo}%
-    \imprimirsubtitulo@ifchunicamp
+    \linha@de@subtitulo
   }
 \end{vplace}
 
@@ -152,13 +159,13 @@
 \MakeUppercase{\large\imprimirautor}
 
 \begin{vplace}[1]
-\@zeroparbox{%
+\@smashedparbox{%
   \centering
 % FOLHA DE ROSTO: TÍTULO
 \begingroup
 \ABNTEXchapterfont\Large
   \MakeUppercase{\imprimirtitulo}%
-  \imprimirsubtitulo@ifchunicamp
+  \linha@de@subtitulo
 \endgroup
 
 % FOLHA DE ROSTO: PREÂMBULO
@@ -179,8 +186,7 @@
 % FOLHA DE ROSTO: VERSÃO FINAL
 \vspace*{2\onelineskip}%
 \savebox{\versaofinaldaunic@mpbox}{%
-  \parbox{.5\textwidth}{\MakeUppercase{%
-    \ABNTEXfontereduzida
+  \parbox{.5\textwidth}{\ABNTEXfontereduzida\MakeUppercase{%
     Este exemplar corresponde à versão final da tese defendida
     \peloalunounic@mp\ \imprimirautor,
     orientada por \imprimirorientador.%
