@@ -7,11 +7,11 @@ a capa e a folha de rosto da classe abnTeX2
 de modo a ficarem compatíveis com
 as normas para Dissertações e Teses do IFCH/Unicamp.
 A norma consultada é a
-versão 30/2020,
+versão 42/2022,
 disponível
 `no site do IFCH/Unicamp
-<https://www.ifch.unicamp.br/ifch/pos/formularios>`_
-(acesso em 19/02/2020).
+<https://www.ifch.unicamp.br/ifch/pf-ifch/public-files/pos/formularios/manual_defesa_v44_2022.pdf>`_
+(acesso em 28/09/2022).
 
 Esta customização da classe abnTeX2 procura seguir as diretrizes especificadas
 `aqui <https://github.com/abntex/abntex2/wiki/ComoCustomizar>`_.
