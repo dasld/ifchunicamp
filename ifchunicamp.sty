@@ -31,11 +31,19 @@
 % deve ser a primeira (ou única) informação no argumento opcional de \ProvidesPackage
 % e vir no formato YYYY-MM-DD
 \ProvidesPackage{ifchunicamp}[2022/09/28]
-\RequirePackage[utf8]{inputenc}%  este documento deve ser lido em UTF-8
+
+\RequirePackage[utf8]{inputenc}  % pressupomos UTF-8
+\@ifclassloaded{abntex2}{}{%
+  \PackageError
+  {ifchunicamp}
+  {só pode ser usado com a classe abntex2}
+  {}%
+}
 \RequirePackage{xkeyval}
 % abnTeX2 carrega hyperref e bookmark, que dão o comando \pdfbookmark
 % https://github.com/abntex/abntex2/blob/f0a4d3c8589f0f2e7c087880f0816debda036eb4/tex/latex/abntex2/abntex2.cls#L126
 \PassOptionsToPackage{unicode}{hyperref}
+% abnTeX2 carrega etoolbox, que dá o comando \ifstrequal
 \@ifpackageloaded{graphicx}
   {\PassOptionsToPackage{pdftex}{graphicx}}
   {\RequirePackage[pdftex]{graphicx}}
@@ -44,9 +52,10 @@
 % -- miscelânea
 % o manual do IFCH chama a folha de rosto de "página de rosto"
 \renewcommand{\folhaderostoname}{Página de rosto}
-\newcommand{\@smashedparbox}[1]{%
-  % \smash não tolera argumento contendo \par, então essa macro é mais ou menos
-  % \smash só que sem zerar a largura
+\newcommand{\ifch@smashed@parbox}[1]{%
+  % \smash não é \long, não tolera argumento contendo \par,
+  % então essa macro é mais ou menos \smash só que \long
+  % e sem zerar a largura
   % baseado em: https://tex.stackexchange.com/a/424204
   % colocar o conteúdo em uma parbox na box\@tempboxa
   \setbox\@tempboxa\hbox{\parbox{\linewidth}{#1}}%
@@ -58,9 +67,11 @@
 
 % -- subtítulo
 % https://github.com/abntex/abntex2/blob/f0a4d3c8589f0f2e7c087880f0816debda036eb4/tex/latex/abntex2/abntex2.cls#L697
-\newcommand{\imprimirsubtitulo}{}
-\newcommand{\subtitulo}[1]{\renewcommand{\imprimirsubtitulo}{#1}}
-\newcommand{\linha@de@subtitulo}{%
+% o subtítulo não pode conter \par porque \MakeUppercase não é \long,
+% então usamos \newcommand* aqui
+\newcommand*{\imprimirsubtitulo}{}
+\newcommand*{\subtitulo}[1]{\renewcommand*{\imprimirsubtitulo}{#1}}
+\newcommand{\ifch@subtitle@line}{%
   \abntex@ifnotempty{\imprimirsubtitulo}{%
     {:}\par\MakeUppercase{\imprimirsubtitulo}
   }%
@@ -70,32 +81,42 @@
 % -- opção "semlogo"
 % 13,91mm é a média entre as alturas mínima e máxima
 % permitidas pela Unicamp para seu logotipo
-\newcommand{\logodaunic@mp}{\includegraphics[height=13.91mm]{logo.pdf}}
-% a linha abaixo permite usar
-% \usepackage[semlogo=?]
+\newcommand*{\ifch@logo@unicamp}{\includegraphics[height=13.91mm]{logo.pdf}}
+% a linha abaixo:
+% \define@key{capaifch}{semlogo}[]{\global\let\ifch@logo@unicamp\relax}
+% permite usar \usepackage[semlogo=?]
 % onde ? é QUALQUER valor, o que eu acho meio estranho,
 % embora pacotes como geometry usem essa convenção.
-% \define@key{capaifch}{semlogo}[]{\def\logodaunic@mp{}}
 % acho mais lógico usar essa outra definição, que
 % permite apenas as sintaxes:
-% \usepackage[semlogo] / \usepackage[semlogo=true] (equivalentes)
-% \usepackage[semlogo=false] (correto, porém inócuo)
+% \usepackage[semlogo]{ifchunicamp} / \usepackage[semlogo=true]{ifchunicamp} (equivalentes)
+% \usepackage[semlogo=false] (correto, equivalente a \usepackage{ifchunicamp})
 \define@boolkey{capaifch}{semlogo}[true]{%
-  \ifstrequal{#1}{true}{\let\logodaunic@mp\relax}
+  \ifstrequal
+    {#1}
+    {true}
+    {\global\let\ifch@logo@unicamp\relax}
+    {}%
 }
 
 % -- opção "naofinal"
-\newsavebox{\versaofinaldaunic@mpbox}
-\newcommand{\versaofinaldaunic@mp}{\usebox{\versaofinaldaunic@mpbox}}
+\newsavebox{\ifch@vfinal@box}
+\newcommand{\ifch@vfinal}{\usebox{\ifch@vfinal@box}}
 \define@boolkey{capaifch}{naofinal}[true]{%
-  \ifstrequal{#1}{true}{%
-    \def\versaofinaldaunic@mp{\phantom{\usebox{\versaofinaldaunic@mpbox}}}%
-  }%
-}
+  \ifstrequal
+    {#1}
+    {true}
+    {\gdef\ifch@vfinal{\phantom{\usebox{\ifch@vfinal@box}}}}
+    {}%
+}%
+
+% -- opção "trabalho"
+\newcommand*{\ifch@trabalho}{tese}
+\define@key{capaifch}{trabalho}{\renewcommand*{\ifch@trabalho}{#1}}
 
 % -- opção "peloaluno"
-\newcommand*{\peloalunounic@mp}{pelo aluno}
-\define@key{capaifch}{peloaluno}{\def\peloalunounic@mp{#1}}
+\newcommand*{\ifch@pelo@aluno}{pelo aluno}
+\define@key{capaifch}{peloaluno}{\renewcommand*{\ifch@pelo@aluno}{#1}}
 
 
 % usando \ProcessOptionsX em vez de
@@ -114,13 +135,14 @@
   %\setlength{\topskip}{\z@}%
   %\nointerlineskip
 % CAPA: LOGOTIPO DA UNICAMP
-\logodaunic@mp
+\ifch@logo@unicamp
 
 \centering
 \ABNTEXchapterfont
 % CAPA: INSTITUIÇÃO
-% \MakeUppercase e \MakeTextUppercase não funcionam (mais?) aqui,
-% mesmo com \expandafter; mas \uppercase (ainda) funciona
+% \MakeUppercase e \MakeTextUppercase não são \long,
+% não toleram macros contendo \par
+% mas \uppercase funciona (com os \expandafter)
 \textbf{\Large\expandafter\uppercase\expandafter{\imprimirinstituicao}}
 
 % CAPA: AUTOR
@@ -131,10 +153,10 @@
 % vplace é definido pela classe memoir (base de abnTeX2)
 % "the optional argument specifies the ratio of the upper space to the lower space"
 \begin{vplace}[1]
-  \@smashedparbox{%
+  \ifch@smashed@parbox{%
     \centering\LARGE
     \MakeUppercase{\bfseries\imprimirtitulo}%
-    \linha@de@subtitulo
+    \ifch@subtitle@line
   }
 \end{vplace}
 
@@ -159,13 +181,13 @@
 \MakeUppercase{\large\imprimirautor}
 
 \begin{vplace}[1]
-\@smashedparbox{%
+\ifch@smashed@parbox{%
   \centering
 % FOLHA DE ROSTO: TÍTULO
 \begingroup
 \ABNTEXchapterfont\Large
   \MakeUppercase{\imprimirtitulo}%
-  \linha@de@subtitulo
+  \ifch@subtitle@line
 \endgroup
 
 % FOLHA DE ROSTO: PREÂMBULO
@@ -185,15 +207,16 @@
 
 % FOLHA DE ROSTO: VERSÃO FINAL
 \vspace*{2\onelineskip}%
-\savebox{\versaofinaldaunic@mpbox}{%
+\savebox{\ifch@vfinal@box}{%
   \parbox{.5\textwidth}{\ABNTEXfontereduzida\MakeUppercase{%
-    Este exemplar corresponde à versão final da tese defendida
-    \peloalunounic@mp\ \imprimirautor,
+    Este exemplar corresponde à versão final
+    da \ifch@trabalho\ defendida
+    \ifch@pelo@aluno\ \imprimirautor,
     orientada por \imprimirorientador.%
   }}%
 }%
-\versaofinaldaunic@mp
-}
+\ifch@vfinal
+}% fim de \ifch@smashed@parbox
 \end{vplace}
 
 
