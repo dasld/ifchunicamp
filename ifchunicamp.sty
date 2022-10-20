@@ -26,42 +26,62 @@
 % https://www.ifch.unicamp.br/ifch/pf-ifch/public-files/pos/formularios/manual_defesa_v44_2022.pdf
 % (acesso em 28/09/2022).
 
-\NeedsTeXFormat{LaTeX2e}
+
+% -- carregamento de pacotes
+\NeedsTeXFormat{LaTeX2e}[2020/10/01]  % precisamos de \NewCommandCopy
+% nessa versão do kernel de LaTeX, utf8 já é o padrão,
+% então não precisamos de \RequirePackage[utf8]{inputenc}
 % segundo o documento "LATEX2e for class and package writers", a data do pacote
 % deve ser a primeira (ou única) informação no argumento opcional de \ProvidesPackage
 % e vir no formato YYYY-MM-DD
-\ProvidesPackage{ifchunicamp}[2022/09/28]
+\ProvidesPackage{ifchunicamp}[2022/10/20]
 
-\RequirePackage[utf8]{inputenc}  % pressupomos UTF-8
 \@ifclassloaded{abntex2}{}{%
-  \PackageError
-  {ifchunicamp}
+  \PackageError{ifchunicamp}
   {só pode ser usado com a classe abntex2}
-  {}%
+  {}% sem ajuda extra
+  \endinput
 }
 \RequirePackage{xkeyval}
 % abnTeX2 carrega hyperref e bookmark, que dão o comando \pdfbookmark
 % https://github.com/abntex/abntex2/blob/f0a4d3c8589f0f2e7c087880f0816debda036eb4/tex/latex/abntex2/abntex2.cls#L126
 \PassOptionsToPackage{unicode}{hyperref}
 % abnTeX2 carrega etoolbox, que dá o comando \ifstrequal
-\@ifpackageloaded{graphicx}
-  {\PassOptionsToPackage{pdftex}{graphicx}}
-  {\RequirePackage[pdftex]{graphicx}}
+\RequirePackage{graphicx}
 
 
 % -- miscelânea
 % o manual do IFCH chama a folha de rosto de "página de rosto"
-\renewcommand{\folhaderostoname}{Página de rosto}
+\renewcommand*{\folhaderostoname}{Página de rosto}
 \newcommand{\ifch@smashed@parbox}[1]{%
+  \begingroup
   % \smash não é \long, não tolera argumento contendo \par,
   % então essa macro é mais ou menos \smash só que \long
   % e sem zerar a largura
   % baseado em: https://tex.stackexchange.com/a/424204
   % colocar o conteúdo em uma parbox na box\@tempboxa
-  \setbox\@tempboxa\hbox{\parbox{\linewidth}{#1}}%
-  \ht\@tempboxa\z@% zerar o height da caixa
-  \dp\@tempboxa\z@% zerar o depth da caixa
-  \leavevmode@ifvmode\box\@tempboxa% usar a caixa de fato
+  \sbox{\@tempboxa}{\parbox{\linewidth}{#1}}%
+  \ht\@tempboxa=\z@% zerar o height da caixa
+  \dp\@tempboxa=\z@% zerar o depth da caixa
+  \usebox{\@tempboxa}% usar a caixa de fato
+  \endgroup
+}
+% isso aqui é necessário porque
+% \IfFileExists ignora o comando \graphicspath{...}
+% cf https://tex.stackexchange.com/a/660433
+% \input@path pode estar definido ou não; se estiver, não queremos redefiní-lo!
+\providecommand*{\input@path}{}
+\newcommand*{\ifch@if@image@exists}[3]{%
+  \begingroup
+  \ifdefined\Ginput@path
+    \edef\input@path{\input@path\Ginput@path}%
+  \fi
+  \IfFileExists{#1}{\endgroup #2}{\endgroup #3}%
+}
+\newcommand*{\ifch@bad@logo}[1]{%
+  \PackageError{ifchunicamp}
+  {o arquivo de logo "#1" não foi encontrado}
+  {}% sem ajuda extra
 }
 
 
@@ -73,17 +93,27 @@
 \newcommand*{\subtitulo}[1]{\renewcommand*{\imprimirsubtitulo}{#1}}
 \newcommand{\ifch@subtitle@line}{%
   \abntex@ifnotempty{\imprimirsubtitulo}{%
-    {:}\par\MakeUppercase{\imprimirsubtitulo}
+    {:}\par\MakeUppercase{\imprimirsubtitulo}%
   }%
 }
 
 
-% -- opção "semlogo"
+% -- opções "logo" e "semlogo"
 % 13,91mm é a média entre as alturas mínima e máxima
 % permitidas pela Unicamp para seu logotipo
-\newcommand*{\ifch@logo@unicamp}{\includegraphics[height=13.91mm]{logo.pdf}}
+\newcommand*{\ifch@logo@file}{logo.pdf}
+\newcommand*{\ifch@put@logo}{%
+  \ifch@if@image@exists{\ifch@logo@file}
+    {\includegraphics[height=13.91mm]{\ifch@logo@file}}
+    {\ifch@bad@logo{\ifch@logo@file}}%
+}
+\define@key{capaifch}{logo}{%
+  \ifch@if@image@exists{#1}
+    {\renewcommand*{\ifch@logo@file}{#1}}
+    {\ifch@bad@logo{#1}}%
+}
 % a linha abaixo:
-% \define@key{capaifch}{semlogo}[]{\global\let\ifch@logo@unicamp\relax}
+% \define@key{capaifch}{semlogo}[]{\let\ifch@put@logo\relax}
 % permite usar \usepackage[semlogo=?]
 % onde ? é QUALQUER valor, o que eu acho meio estranho,
 % embora pacotes como geometry usem essa convenção.
@@ -92,21 +122,18 @@
 % \usepackage[semlogo]{ifchunicamp} / \usepackage[semlogo=true]{ifchunicamp} (equivalentes)
 % \usepackage[semlogo=false] (correto, equivalente a \usepackage{ifchunicamp})
 \define@boolkey{capaifch}{semlogo}[true]{%
-  \ifstrequal
-    {#1}
-    {true}
-    {\global\let\ifch@logo@unicamp\relax}
+  \ifstrequal{#1}{true}
+    {\let\ifch@put@logo\relax}
     {}%
 }
 
 % -- opção "naofinal"
-\newsavebox{\ifch@vfinal@box}
-\newcommand{\ifch@vfinal}{\usebox{\ifch@vfinal@box}}
+\NewCommandCopy\ifch@put@vfinal\@firstofone
 \define@boolkey{capaifch}{naofinal}[true]{%
-  \ifstrequal
-    {#1}
-    {true}
-    {\gdef\ifch@vfinal{\phantom{\usebox{\ifch@vfinal@box}}}}
+  \ifstrequal{#1}{true}
+    % usar \@gobble faria o conteúdo ser totalmente omitido,
+    % mas queremos que ele ocupe espaço sem aparecer
+    {\let\ifch@put@vfinal\phantom}
     {}%
 }%
 
@@ -135,7 +162,7 @@
   %\setlength{\topskip}{\z@}%
   %\nointerlineskip
 % CAPA: LOGOTIPO DA UNICAMP
-\ifch@logo@unicamp
+\ifch@put@logo
 
 \centering
 \ABNTEXchapterfont
@@ -183,12 +210,12 @@
 \begin{vplace}[1]
 \ifch@smashed@parbox{%
   \centering
-% FOLHA DE ROSTO: TÍTULO
-\begingroup
-\ABNTEXchapterfont\Large
+  % FOLHA DE ROSTO: TÍTULO
+  \begingroup
+  \ABNTEXchapterfont\Large
   \MakeUppercase{\imprimirtitulo}%
   \ifch@subtitle@line
-\endgroup
+  \endgroup
 
 % FOLHA DE ROSTO: PREÂMBULO
 \abntex@ifnotempty{\imprimirpreambulo}{%
@@ -207,15 +234,14 @@
 
 % FOLHA DE ROSTO: VERSÃO FINAL
 \vspace*{2\onelineskip}%
-\savebox{\ifch@vfinal@box}{%
+\ifch@put@vfinal{%
   \parbox{.5\textwidth}{\ABNTEXfontereduzida\MakeUppercase{%
     Este exemplar corresponde à versão final
     da \ifch@trabalho\ defendida
     \ifch@pelo@aluno\ \imprimirautor,
     orientada por \imprimirorientador.%
   }}%
-}%
-\ifch@vfinal
+}
 }% fim de \ifch@smashed@parbox
 \end{vplace}
 
