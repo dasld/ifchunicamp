@@ -28,13 +28,14 @@
 
 
 % -- carregamento de pacotes
-\NeedsTeXFormat{LaTeX2e}[2020/10/01]  % precisamos de \NewCommandCopy
-% nessa versão do kernel de LaTeX, utf8 já é o padrão,
-% então não precisamos de \RequirePackage[utf8]{inputenc}
+\NeedsTeXFormat{LaTeX2e}
+% utf8 é o padrão nas edições mais recentes do kernel,
+% mas vamos nos precaver mesmo assim
+\RequirePackage[utf8]{inputenc}
 % segundo o documento "LATEX2e for class and package writers", a data do pacote
 % deve ser a primeira (ou única) informação no argumento opcional de \ProvidesPackage
 % e vir no formato YYYY-MM-DD
-\ProvidesPackage{ifchunicamp}[2022/10/20]
+\ProvidesPackage{ifchunicamp}[2022/10/23]
 
 \@ifclassloaded{abntex2}{}{%
   \PackageError{ifchunicamp}
@@ -46,7 +47,8 @@
 % abnTeX2 carrega hyperref e bookmark, que dão o comando \pdfbookmark
 % https://github.com/abntex/abntex2/blob/f0a4d3c8589f0f2e7c087880f0816debda036eb4/tex/latex/abntex2/abntex2.cls#L126
 \PassOptionsToPackage{unicode}{hyperref}
-% abnTeX2 carrega etoolbox, que dá o comando \ifstrequal
+% abnTeX2 carrega etoolbox, mas vamos nos precaver mesmo assim
+\RequirePackage{etoolbox}  % precisamos da macro \ifstrequal
 \RequirePackage{graphicx}
 
 
@@ -128,7 +130,7 @@
 }
 
 % -- opção "naofinal"
-\NewCommandCopy\ifch@put@vfinal\@firstofone
+\@ifdefinable\ifch@put@vfinal{\let\ifch@put@vfinal\@firstofone}
 \define@boolkey{capaifch}{naofinal}[true]{%
   \ifstrequal{#1}{true}
     % usar \@gobble faria o conteúdo ser totalmente omitido,
