@@ -2,56 +2,47 @@
 ifchunicamp
 ===========
 
-Este pacote altera a capa e a folha de rosto da classe abnTeX2
+Esta classe altera a capa e a folha de rosto da classe abnTeX2
 de modo a ficarem compatíveis com
-as normas para Dissertações e Teses do IFCH/Unicamp.
-A norma consultada é a
-versão 42/2022,
-disponível
-`no site do IFCH/Unicamp
-<https://www.ifch.unicamp.br/ifch/pf-ifch/public-files/pos/formularios/manual_defesa_v44_2022.pdf>`_
-(acesso em 28/09/2022).
+as normas para Dissertações e Teses do IFCH/UNICAMP.
+
+As normas consultadas são o
+`"Manual de defesa de dissertação/tese" do IFCH/UNICAMP <https://www.ifch.unicamp.br/ifch/pf-ifch/public-files/pos/formularios/manual_defesa_v47_2023.pdf>`_
+e a
+`"Instrução normativa CCPG Nº 002/2021" <https://www.ifch.unicamp.br/ifch/pf-ifch/public-files/pos/legislacao/insccpg002_2021.pdf>`_
+(acesso em 30/08/2024).
 
 Esta customização da classe abnTeX2 procura seguir as diretrizes especificadas
 `aqui <https://github.com/abntex/abntex2/wiki/ComoCustomizar>`_.
 
-Para utilizar este pacote em seu documento abnTeX2,
-adicione ao seu prêambulo a linha
-``\usepackage{ifchunicamp}``.
-Ela precisa vir **após** a linha ``\documentclass{abntex2}``!
-Este pacote só pode ser usado com a classe abnTeX2.
-Estão disponíveis as seguintes opções
-(especificadas entre colchetes,
-logo após a expressão
-``\usepackage`` e antes de ``{``):
+Para utilizar esta classe em seu documento,
+comece o prêambulo do seu documento com a linha
+``\documentclass{ifchunicamp}``.
+Você pode especificar as seguintes opções entre colchetes, logo após a expressão
+``\documentclass`` e antes de ``{``):
 
 * ``logo={}``:
   especifica o arquivo entre chaves como
-  aquele contendo o logo da Unicamp;
+  aquele contendo o logo da UNICAMP.
+* ``alturadologo={}``:
+  especifica a dimensão entre chaves como a altura do logo da UNICAMP. Recomendo
+  que você não use essa opção. Se não usar, o logo terá a altura das linhas
+  "UNIVERSIDADE ESTADUAL DE CAMPINAS/INSTITUTO DE FILOSOFIA E CIÊNCIAS HUMANAS".
 * ``semlogo``:
-  omite o logo da Unicamp no canto superior esquerdo da capa;
+  omite o logo da UNICAMP no canto superior esquerdo da capa.
 * ``naofinal``:
   omite o bloco de texto na folha de rosto
-  que identifica o trabalho como versão final;
-* ``peloaluno={}``:
-  substitui a expressão "pelo aluno"
-  no bloco de texto de versão final
-  pela expressão entre chaves;
-* ``trabalho={}``:
-  substitui a palavra "tese"
-  no bloco de texto de versão final
-  pela expressão entre chaves.
+  que identifica o trabalho como versão final.
+
 
 Essas opções podem ser combinadas com vírgulas.
 Por exemplo:
 
-* ``\usepackage[semlogo,naofinal]{ifchunicamp}``:
+* ``\usepackage[semlogo, naofinal]{ifchunicamp}``:
   omite o logo e também o bloco de texto de versão final.
-* ``\usepackage[peloaluno={pelx alunx}]{ifchunicamp}``:
-  substitui a expressão "pelo aluno" por "pelx alunx".
-* ``\usepackage[logo={imagem.png},trabalho={dissertação}]{ifchunicamp}``:
-  usa o arquivo ``imagem.png`` como logo da Unicamp, e
-  substitui a expressão "tese" por "dissertção".
+* ``\usepackage[logo={imagem.png}, naofinal]{ifchunicamp}``:
+  usa o arquivo ``imagem.png`` como logo da UNICAMP, e
+  omite o bloco de texto de versão final.
 
 As opções "logo" e "semlogo" podem ser combinadas, mas
 "sem logo" torna sem efeito a especificação do logo.
@@ -80,48 +71,35 @@ Mais informações podem ser encontradas
 
 Mais informações sobre o bloco de versão final
 ----------------------------------------------
-O bloco de texto controlado pela opção ``naofinal``
-contém a seguinte frase:
+Se não tiver usado a opção ``naofinal``, você precisa informar um bloco de texto
+de versão final.
+Trata-se de uma frase como esta:
 
    ESTE EXEMPLAR CORRESPONDE À VERSÃO FINAL DA <TIPO-DE-TRABALHO> DEFENDIDA
-   PELO ALUNO <NOME DO ALUNO>
+   PELO(A) ALUNO(A) <NOME DO ALUNO>
    ORIENTADA POR <NOME DO ORIENTADOR>.
 
-O campo ``<TIPO-DE-TRABALHO>`` por padrão é "tese", mas
-pode ser especificado pela opção ``trabalho={}``.
-O campo ``<NOME DO ALUNO>`` é especificado pela macro de abnTeX2
-``\autor``,
-e o campo ``<NOME DO ORIENTADOR>``, pela macro
-``\orientador``.
-
+O comando ``\textodeversaofinal{...}`` registra a expressão entre chaves como o
+texto de versão final.
 Por exemplo,
 o código abaixo::
 
-    \usepackage{ifchunicamp}
-    \titulo{Provisório}
-    \subtitulo{provisório}
-    \autor{Fulano da~Silva}
+    \documentclass{ifchunicamp}
+    \titulo{Uma maravilhosa tese}
+    \autor{Fulana da~Silva}
     \orientador[Orientadora]{Profa. Dra. Beltrana Lopes}
+    \tipotrabalho{Tese (doutorado)}
+    \textodeversaofinal{%
+      Este trabalho corresponde à versão final da tese defendida pela aluna
+      \imprimirautor,
+      e orientada pela \imprimirorientador.%
+    }
 
 imprime o seguinte bloco de versão final:
 
    ESTE EXEMPLAR CORRESPONDE À VERSÃO FINAL DA TESE DEFENDIDA
-   PELO ALUNO FULANO DA SILVA
-   ORIENTADA POR PROFA. DRA. BELTRANA LOPES.
-
-Já esse código::
-
-    \usepackage[trabalho={monografia}]{ifchunicamp}
-    \titulo{Provisório}
-    \subtitulo{provisório}
-    \autor{Fulano da~Silva}
-    \orientador[Orientadora]{Profa. Dra. Beltrana Lopes}
-
-imprime o seguinte bloco de versão final:
-
-   ESTE EXEMPLAR CORRESPONDE À VERSÃO FINAL DA MONOGRAFIA DEFENDIDA
-   PELO ALUNO FULANO DA SILVA
-   ORIENTADA POR PROFA. DRA. BELTRANA LOPES.
+   PELA ALUNA FULANA DA SILVA,
+   E ORIENTADA POR PROFA. DRA. BELTRANA LOPES.
 
 
 Contato
