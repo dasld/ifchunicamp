@@ -56,7 +56,7 @@
 }
 % \alturalogounicamp negativa significa que será calculada na hora de colocar
 % o logo na capa
-\newdimen\alturalogounicamp \alturalogounicamp=-1pt\relax
+\newdimen\alturalogounicamp \alturalogounicamp=\m@ne\p@\relax
 \newcommand*\ifch@logo@file{logo.pdf}
 \newcommand*\ifch@put@logo{%
   \ifch@if@image@exists{\ifch@logo@file}{%
@@ -183,9 +183,11 @@
 
 
 % -- configurações diversas
+\renewcommand\imprimirlocal{Campinas}
 \renewcommand\imprimirinstituicao{%
-  Universidade Estadual de Campinas\par
-  Instituto de Filosofia e Ciências Humanas%
+  % isso não é usado aqui. é usado em abnTeX2 só para fazer a folha de rosto,
+  % mas nós temos nossa própria folha de rosto
+  Universidade Estadual de Campinas%
 }
 % o Manual do IFCH chama a capa de "primeira folha"; cf. abntex2.pdf p. 13
 \newcommand*\capaname{Primeira folha}
@@ -215,15 +217,13 @@
   \@ifpackageloaded{graphicx}{}{%
     \ifx\relax\ifch@put@logo\else\RequirePackage{graphicx}\fi
   }%
-  \@ifpackageloaded{hyperref}{%
-    \hypersetup{%
-      pdftitle={\@title},
-      pdfauthor={\@author},
-      % pdfkeywords={},
-      pdfsubject={\imprimirpreambulo},
-    }%
-  }{}%
-}% fim de \AddToHook
+  \hypersetup{%
+    pdftitle={\@title},
+    pdfauthor={\@author},
+    % pdfkeywords={},
+    pdfsubject={\imprimirpreambulo},
+  }%
+}
 
 
 
@@ -232,10 +232,12 @@
 \begin{capa}%
   \pdfbookmark{\capaname}{capa}% <- antes do \selectlanguage!
   \selectlanguage{brazilian}%
+  % NÃO USE \topskip=0pt; isso dá problemas com a paginação:
+  % https://tex.stackexchange.com/q/550398
+  \topskip=1sp\relax
   \parindent=\z@
   \ABNTEXchapterfont
   \centering
-  %\topskip=\z@
   %\nointerlineskip
 
 % CAPA: LOGOTIPO
@@ -249,7 +251,7 @@
   % a altura máxima "em um formulário" é 6% do maior lado do papel
   % 0,06*297mm = 17,82mm
   % https://www.unicamp.br/logotipo
-  \ifdim\alturalogounicamp<0pt\global\alturalogounicamp=\dimexpr \ht\@tempboxa + \dp\@tempboxa \relax\fi
+  \ifdim\alturalogounicamp<\z@ \global\alturalogounicamp=\dimexpr \ht\@tempboxa + \dp\@tempboxa \relax\fi
   \ifdim\alturalogounicamp<10mm\global\alturalogounicamp=10mm\fi
   \ifdim\alturalogounicamp>17.82mm\global\alturalogounicamp=17.82mm\fi
   \ifch@put@logo  % isso é \relax quando vigora a opção "semlogo"
@@ -298,8 +300,12 @@
 % == FOLHA DE ROSTO ==
 \renewcommand\folhaderostocontent{%
   \selectlanguage{brazilian}%
+  % NÃO USE \topskip=0pt; isso dá problemas com a paginação:
+  % https://tex.stackexchange.com/q/550398
+  \topskip=1sp\relax
   \parindent=\z@
   \centering
+
 % FOLHA DE ROSTO: AUTOR
 \MakeUppercase{\large\imprimirautor}
 
@@ -357,8 +363,6 @@
       \parbox{.5\textwidth}{\ABNTEXfontereduzida\MakeUppercase{\imprimirversaofinal}}%
   }%
 \fi
-
-
 }% fim de \ifch@smashed@parbox
 \end{vplace}
 
