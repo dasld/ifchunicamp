@@ -1,0 +1,142 @@
+% -- capa
+\newcommand*\imprimircapa{%
+  \begingroup
+  \microtypesetup{activate=false}%
+  \currentpdfbookmark{Capa}{capa}% <- antes do \selectlanguage!
+  \selectlanguage{brazilian}%
+  \parindent=\z@
+  \sffamily
+  \centering
+  %\offinterlineskip
+  \nointerlineskip
+
+% os campos realmente indispensáveis:
+\@for\next:={autor,titulo,data,preambulo,orientador/cargo,orientador/nome}\do{%
+  \ifch@check@campo{\next}%
+}%
+
+% CAPA: LOGOTIPO DA UNICAMP
+\begingroup
+  \setbox\@tempboxa=\vbox{\halign{%
+    \bfseries\hfill##\hfill\cr  % duplo # por estarmos dentro de uma definição de macro
+    UNIVERSIDADE ESTADUAL DE CAMPINAS\cr
+    INSTITUTO DE FILOSOFIA E CIÊNCIAS HUMANAS\cr
+  }}%
+  % a altura mínima do logotipo é 10mm
+  % a altura máxima "em um formulário" é 6% do maior lado do papel
+  % 0,06*297mm = 17,82mm
+  % https://www.unicamp.br/logotipo
+  \ifdim\ifch@altura@logo<\z@ \global\ifch@altura@logo=\dimexpr \ht\@tempboxa + \dp\@tempboxa \relax\fi
+  \ifdim\ifch@altura@logo<10mm\global\ifch@altura@logo=10mm\fi
+  \ifdim\ifch@altura@logo>17.82mm\global\ifch@altura@logo=17.82mm\fi
+  \ifch@put@logo  % isso é \relax quando vigora a opção "sem logo"
+  \leavevmode\box\@tempboxa\par
+\endgroup
+
+% CAPA: AUTOR
+\vskip 3\baselineskip
+\MakeUppercase{\large\ifchcampo{autor}}\par
+
+% CAPA: TÍTULO
+\vfill
+\parbox[t]\textwidth{%
+  \centering\LARGE
+  \MakeUppercase{\bfseries\ifchcampo{titulo}}\ifch@subtitle@line
+  %
+  \ifch@ifnotempty{\ifchcampo{titulo secundario}}{%
+    \vskip\baselineskip
+    \MakeUppercase{\bfseries\ifchcampo{titulo secundario}}\ifch@subtitle@line*%
+  }%
+}\par
+
+% CAPA: LOCAL E DATA
+\vfill
+\large
+CAMPINAS\par
+\ifchcampo{data}\par
+\endgroup
+  \clearpage
+}
+
+
+
+% -- folha de rosto
+\newcommand*\imprimirfolhaderosto{%
+  \begingroup
+  \microtypesetup{activate=false}%
+  \currentpdfbookmark{Folha de rosto}{folhaderosto}% <- antes do \selectlanguage!
+  \selectlanguage{brazilian}%
+  \parindent=\z@
+  \centering
+  \nointerlineskip
+
+% FOLHA DE ROSTO: AUTOR
+\MakeUppercase{\large\ifchcampo{autor}}\par
+
+\vfill
+\parbox[t]\textwidth{%
+  \centering
+  % FOLHA DE ROSTO: TÍTULO
+  \begingroup
+  \sffamily\Large%\doublespacing
+  \MakeUppercase{\ifchcampo{titulo}}\ifch@subtitle@line
+  \ifch@ifnotempty{\ifchcampo{titulo secundario}}{%
+    \vskip\baselineskip
+    \MakeUppercase{\ifchcampo{titulo secundario}}\ifch@subtitle@line*%
+  }%
+  \endgroup
+
+% FOLHA DE ROSTO: PREÂMBULO
+\ifch@ifnotempty{\ifchcampo{preambulo}}{%
+  \vskip .12\textheight
+  \hspace*{\fill}%
+  \parbox{.5\textwidth}{\singlespacing\expanded{\ifchcampo{preambulo}}}\par
+}
+
+% FOLHA DE ROSTO: PREÂMBULO ESTRANGEIRO
+\ifch@ifnotempty{\ifchcampo{preambulo secundario}}{%
+  \vskip \baselineskip
+  \hspace*{\fill}%
+  \parbox{.5\textwidth}{\singlespacing\expanded{\ifchcampo{preambulo secundario}}}\par
+}
+
+% flushleft é um environment; \raggedright é um switch
+\raggedright
+% FOLHA DE ROSTO: ORIENTAÇÃO
+\vskip 2\baselineskip
+\textit{\ifchcampo{orientador/cargo}}:\enspace\ifchcampo{orientador/nome}%
+\ifch@ifnotempty{\ifchcampo{coorientador/nome}}{%
+  \par\textit{\ifchcampo{coorientador/cargo}}:\enspace\ifchcampo{coorientador/nome}%
+}\par
+
+% FOLHA DE ROSTO: VERSÃO FINAL
+\vskip 2\baselineskip
+\@tempswatrue  % true se o texto de versão final está vazio
+\ifch@ifnotempty{\ifchcampo{texto de versao final}}{\@tempswafalse}%
+\ifx\ifch@put@vfinal\@firstofone  % precisamos imprimir a frase de versão final...
+    \if@tempswa                   % ...mas o texto de versão final está vazio!
+      \ClassError{ifchunicamp}{%
+        Não há texto de versão final. Por favor,
+        informe o texto de versão final com o comando
+        \protect\SetKeys[ifchunicamp]{texto de versao final = {...}}%
+      }{}% sem ajuda extra
+    \fi
+\fi
+% imprima (normalmente ou com \phantom):
+\ifch@put@vfinal{%
+  \parbox{.5\textwidth}{%
+    \footnotesize
+    \singlespacing
+    \MakeUppercase{\expanded{\ifchcampo{texto de versao final}}}%
+  }%
+}%
+}% fim do grande \parbox
+\par
+
+% FOLHA DE ROSTO: LOCAL E DATA
+\vfill
+\large
+CAMPINAS\par  \ifchcampo{data}\par
+\endgroup
+  \clearpage
+}

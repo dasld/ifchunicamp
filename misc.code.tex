@@ -1,0 +1,70 @@
+% -- comandos internos diversos
+\newcommand*\ifch@ifnotempty[1]{%
+  % uso: \ifch@notempty{algo}{...coisas...}
+  % se {algo} imprime texto, {...coisas...} é executado
+  % se {algo} não imprime texto, {...coisas...} não é executado
+  \begingroup
+    \let\ClassWarning=\@gobbletwo
+  \sbox0{#1}%
+  \ifdim\wd0>\z@
+    \aftergroup\@firstofone
+  \else
+    \aftergroup\@gobble
+  \fi
+  \endgroup
+}
+
+\NewDocumentCommand\ifch@subtitle@line{s}{%
+  \begingroup
+    \IfBooleanTF{#1}
+      {\edef\@tempa{\ifchcampo{subtitulo secundario}}}%
+      {\edef\@tempa{\ifchcampo{subtitulo}}}%
+  \ifch@ifnotempty\@tempa{%
+    :\par\expandafter\MakeUppercase\expandafter{\@tempa}%
+  }%
+  \endgroup
+  \par
+}
+
+% isso aqui é necessário porque
+% \IfFileExists ignora o comando \graphicspath{...}
+% https://tex.stackexchange.com/a/660433
+% \input@path pode estar definido ou não; se estiver, não queremos redefini-lo!
+\providecommand*\input@path{}
+
+\newcommand*\ifch@if@image@exists[3]{%
+  \begingroup
+  \ifdefined\Ginput@path
+    \edef\input@path{\input@path\Ginput@path}%
+  \fi
+  \IfFileExists{#1}{\endgroup #2}{\endgroup #3}%
+}
+
+\newcommand*\ifch@bad@logo[1]{%
+  \ClassError{ifchunicamp}{%
+    O arquivo de logo "#1" não foi encontrado%
+  }{}% sem ajuda extra
+}
+
+% \ifch@altura@logo negativa significa que será calculada na hora de colocar o logo na capa
+\newdimen\ifch@altura@logo \ifch@altura@logo=-1pt\relax
+
+\newcommand*\ifch@logo@file{logo.pdf}
+
+\newcommand*\ifch@put@logo{%
+  \ifch@if@image@exists{\ifch@logo@file}{%
+    % https://tex.stackexchange.com/a/672078
+    \AddToHookNext{shipout/background}{%
+      % shipout/background This hook adds a picture environment into the background of the
+      % page with the (0,0) coordinate in the top-left corner using a \unitlength of 1pt.
+      % uma distância vertical negativa significa "pra baixo"
+      \put(\Gm@lmargin, -\dimexpr \Gm@tmargin+\ifch@altura@logo \relax){%
+        \includegraphics[height=\ifch@altura@logo]{\ifch@logo@file}%
+      }%
+    }%
+  }
+  {\ifch@bad@logo{\ifch@logo@file}}%
+}
+
+\NewCommandCopy\ifch@put@vfinal\@firstofone
+

@@ -1,0 +1,104 @@
+\newcommand*\ifch@tocpagenumber[1]{%
+  \hss\normalfont\sffamily\normalcolor #1%
+}
+
+\newcommand*\ifch@tocdots{%
+  % this is from latex.ltx
+  \leaders\hbox{$\m@th
+    \mkern \@dotsep mu\hbox{.}\mkern \@dotsep
+    mu$}\hfill
+  \nobreak
+}
+
+
+\newdimen\ifch@widesttoc
+
+\newcommand*\ifch@considerentry[1]{%
+  \begingroup
+  \sbox0{#1}%
+  \ifdim\wd0>\ifch@widesttoc
+    \global\ifch@widesttoc=\wd0
+  \fi
+  \endgroup
+}
+
+% existe o sistema ltproperties no kernel do LaTeX pra fazer esse tipo de coisa,
+% mas não consegui fazer funcionar
+\AddToHook{enddocument/afterlastpage}{%
+  % we write into the .aux file the following line:
+  %   \global\ifch@widesttoc=XX.XXXXpt\relax
+  \immediate\write\@auxout{%
+    \noexpand\global
+    \noexpand\ifch@widesttoc=\the\ifch@widesttoc
+    \noexpand\relax
+  }%
+  % we should not close the .aux file; the regular
+  % LaTeX output routine does that
+}
+
+\renewcommand*\numberline[1]{%
+  % this is defined in latex.ltx
+  % it originally uses \@tempdima, which had been set by
+  % \l@chapter
+  \hbox to \dimexpr\ifch@widesttoc+1.5em\relax{#1\hfil }%
+}
+
+% hyperref.sty redefines the \addcontentsline from latex.ltx!
+\NewCommandCopy\hyperref@addcontentsline\addcontentsline
+\renewcommand*\addcontentsline[3]{%
+  % #1: toc extension
+  % #2: type
+  % #3: tag
+  {\let\numberline=\ifch@considerentry \sbox0{#3}}%
+  \hyperref@addcontentsline{#1}{#2}{#3}%
+}
+
+
+\renewcommand*\l@chapter[2]{%
+  % #1: \numberline{...} + content, given by the user
+  % #2: page number
+  \ifnum \c@tocdepth >\m@ne
+    \addpenalty{-\@highpenalty}%
+    \vskip 1.0em \@plus\p@
+    \begingroup
+      \parindent=\z@ \rightskip=\@pnumwidth
+      \parfillskip=-\@pnumwidth
+      % chapter name:
+      \leavevmode \bfseries
+      {\MakeUppercase{#1}}\nobreak\hfil
+      % '...' thing:
+      \ifch@tocdots
+      % page number:
+      \hbox to \@pnumwidth{%
+        \ifch@tocpagenumber{#2}%
+        \kern-\p@\kern\p@
+      }\par
+      \penalty\@highpenalty
+    \endgroup
+  \fi
+}
+
+
+\renewcommand*\@dottedtocline[5]{%
+  % #1: level (1 is chapter, 2 is section, etc)
+  % #4: \numberline{...} + section name (given by the user)
+  % #5: page number
+  \ifnum #1>\c@tocdepth \else %\leftskip=0pt\relax
+    \vskip \z@ \@plus.2\p@
+    \begingroup
+    \rightskip=\@pnumwidth  \parfillskip=-\@pnumwidth
+    \parindent=\z@\@afterindenttrue
+    \interlinepenalty=\@M
+    % section name:
+    \leavevmode
+    {\MakeUppercase{#4}}\nobreak
+    % '...' thing:
+    \ifch@tocdots
+    % page number:
+    \hbox to \@pnumwidth{%
+      \ifch@tocpagenumber{#5}%
+      \kern-\p@\kern\p@
+    }\par
+    \endgroup
+  \fi
+}

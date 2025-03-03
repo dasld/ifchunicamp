@@ -1,0 +1,103 @@
+% -- declaração das chaves
+\newcommand*\ifch@bookoptions{draft,final,leqno,fleqn}
+
+
+\ExplSyntaxOn
+
+\prop_new:N \ifch@keys
+
+\newcommand*\ifchcampo[1]{
+  \prop_item:Ne \ifch@keys {#1}
+}
+
+\newcommand*\ifch@check@campo[1]{
+  \begingroup
+  \sbox0{\ifchcampo{#1}}
+  \ifdim0pt<\wd0\relax
+    \else \ClassWarning{ifchunicamp}{O~campo~"#1"~não~foi~informado}
+  \fi
+  \endgroup
+}
+
+\newcommand*\ifch@slashed@kv{
+  % \l_keys_key_str é a parte após o último "/" no nome
+  % \l_keys_path_str é todo o path, com a parte do ifchunicamp no começo
+  \begingroup
+  % \@nil é apenas um delimitador, usado em @car e @cdr
+  \def\ifch@temp##1/##2\@nil{##2}
+  \prop_gput:Nee \ifch@keys { \expandafter\ifch@temp\l_keys_path_str\@nil } { \l_keys_value_tl }
+  \endgroup
+}
+
+
+\keys_define:nn { ifchunicamp }{
+  % 1) opção "logo"
+  logo .code:n = {
+    \ifch@if@image@exists{#1}
+      { \gdef\ifch@logo@file{#1} }
+      { \ifch@bad@logo{#1} }
+  },
+  logo .value_required:n = true,
+  % 2) opção "altura do logo"
+  altura~do~logo .dim_gset:N = \ifch@altura@logo,
+  altura~do~logo .value_required:n = true,
+  % 3) opção "sem logo": omite o logo na capa
+  sem~logo .code:n = { \global\let\ifch@put@logo=\relax },
+  sem~logo .value_forbidden:n = true,
+  % 4) opção "nao final": omite o bloco "ESTE TRABALHO CORRESPONDE À VERSÃO FINAL" na folha de rosto
+  % usar \@gobble faria o conteúdo ser totalmente omitido,
+  % mas queremos que ele ocupe espaço sem aparecer
+  nao~final .code:n = { \global\let\ifch@put@vfinal=\phantom },
+  nao~final .value_forbidden:n = true,
+  % 5) opção "autor"
+  autor .prop_gput:N = \ifch@keys,
+  autor .value_required:n = true,
+  % 6) opção "titulo"
+  titulo .prop_gput:N = \ifch@keys,
+  titulo .value_required:n = true,
+  % 7) opção "subtitulo"
+  subtitulo .prop_gput:N = \ifch@keys,
+  subtitulo .value_required:n = true,
+  % 8) opção "titulo secundario"
+  titulo~secundario .prop_gput:N = \ifch@keys,
+  titulo~secundario .value_required:n = true,
+  % 9) opção "subtitulo secundario"
+  subtitulo~secundario .prop_gput:N = \ifch@keys,
+  subtitulo~secundario .value_required:n = true,
+  % 10) opção "data"
+  data .prop_gput:N = \ifch@keys,
+  data .value_required:n = true,
+  % 11) opção "preambulo"
+  preambulo .prop_gput:N = \ifch@keys,
+  preambulo .value_required:n = true,
+  % 12) opção "preambulo secundario"
+  preambulo~secundario .prop_gput:N = \ifch@keys,
+  preambulo~secundario .value_required:n = true,
+  % 13) opção "texto de versao final"
+  texto~de~versao~final .prop_gput:N = \ifch@keys,
+  texto~de~versao~final .value_required:n = true,
+  % 14) opção "orientador"
+  orientador / nome .code:n = \ifch@slashed@kv,
+  orientador / nome .value_required:n = true,
+  orientador / cargo .code:n = \ifch@slashed@kv,
+  orientador / cargo .value_required:n = true,
+  % 15) opção "coorientador"
+  coorientador / nome .code:n = \ifch@slashed@kv,
+  coorientador / nome .value_required:n = true,
+  coorientador / cargo .code:n = \ifch@slashed@kv,
+  coorientador / cargo .value_required:n = true,
+  % -> chave desconhecida
+  unknown .code:n = {
+    \@expandtwoargs\in@{\CurrentOption}{\ifch@bookoptions}
+    \ifin@
+      \PassOptionsToClass{\CurrentOption}{book}
+    \else
+      \ClassError{ifchunicamp}{A~opção~"\CurrentOption"~não~é~permitida}{}
+    \fi
+  },
+}  % fim de \keys_define:nn
+
+
+\ExplSyntaxOff
+\ProcessKeyOptions[ifchunicamp]\relax
+
