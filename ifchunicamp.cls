@@ -27,7 +27,6 @@
 % (acesso em 06/04/2024).
 
 
-% -- carregamento de pacotes
 % essa é a versão do LaTeX que provê \ProcessKeyOptions:
 \NeedsTeXFormat{LaTeX2e}[2022-06-01]
 % segundo o documento "LATEX2e for class and package writers", a data do pacote
@@ -158,6 +157,21 @@
 
 
 % -- macros configuráveis pelas opções do usuário
+% -- preâmbulo
+\RenewDocumentCommand\preambulo{ O{brazil} m }{%
+  \renewcommand*\imprimirpreambulo{%
+    \texorpdfstring{\selectlanguage{#1}#2}{#2}%
+  }%
+}
+
+% -- preâmbulo em outra língua estrangeira (inglês ou espanhol)
+\newcommand*\imprimirpreambuloestrangeiro{}
+\NewDocumentCommand\preambuloestrangeiro{ O{brazil} m }{%
+  \renewcommand*\imprimirpreambuloestrangeiro{%
+    \texorpdfstring{\selectlanguage{#1}#2}{#2}%
+  }%
+}
+
 % -- subtítulos
 % https://github.com/abntex/abntex2/blob/f0a4d3c8589f0f2e7c087880f0816debda036eb4/tex/latex/abntex2/abntex2.cls#L697
 % o subtítulo não pode conter \par porque \MakeUppercase não é \long!
@@ -170,11 +184,6 @@
     :\par\MakeUppercase{\imprimirsubtitulo}%
   }%
 }
-
-
-% -- preâmbulo em língua estrangeira (inglês ou espanhol)
-\newcommand*\imprimirpreambuloestrangeiro{}
-\newcommand*\preambuloestrangeiro[1]{\renewcommand*\imprimirpreambuloestrangeiro{#1}}
 
 
 % -- versão final
@@ -205,8 +214,9 @@
 % "SUMÁRIO" em maiúsculas; Manual p. 28 e CCPG p. 19:
 \newcommand*\sumario{%
   \begingroup
-  \edef\contentsname{\expandafter\uppercase\expandafter{\contentsname}}%
-  \pdfbookmark{\contentsname}{toc}% coloca o sumário nas bookmarks do pdf; cf abntex2.pdf p. 13
+  \edef\oldcontentsname{\contentsname}%
+  % coloca o sumário nas bookmarks do pdf; cf abntex2.pdf p. 13
+  \def\contentsname{\pdfbookmark{\oldcontentsname}{toc}\MakeUppercase{\oldcontentsname}}%
   \tableofcontents*% o sumário não lista a si mesmo (nem partes pré-textuais)
   \endgroup
   \clearpage                                % https://tex.stackexchange.com/a/24993/90645
@@ -231,7 +241,7 @@
 \renewcommand\imprimircapa{%
 \begin{capa}%
   \pdfbookmark{\capaname}{capa}% <- antes do \selectlanguage!
-  \selectlanguage{brazilian}%
+  \selectlanguage{brazil}%
   % NÃO USE \topskip=0pt; isso dá problemas com a paginação:
   % https://tex.stackexchange.com/q/550398
   \topskip=1sp\relax
@@ -299,7 +309,7 @@
 
 % == FOLHA DE ROSTO ==
 \renewcommand\folhaderostocontent{%
-  \selectlanguage{brazilian}%
+  \selectlanguage{brazil}%
   % NÃO USE \topskip=0pt; isso dá problemas com a paginação:
   % https://tex.stackexchange.com/q/550398
   \topskip=1sp\relax
@@ -339,9 +349,9 @@
 \flushleft
 % FOLHA DE ROSTO: ORIENTAÇÃO
 \vspace*{2\onelineskip}%
-\textit{\imprimirorientadorRotulo}:\enspace\imprimirorientador
+\textit{\imprimirorientadorRotulo}\enspace\imprimirorientador
 \abntex@ifnotempty{\imprimircoorientador}{%
-  \newline\textit{\imprimircoorientadorRotulo}:\enspace\imprimircoorientador
+  \newline\textit{\imprimircoorientadorRotulo}\enspace\imprimircoorientador
 }
 
 % FOLHA DE ROSTO: VERSÃO FINAL
@@ -360,7 +370,7 @@
 \fi
 \if@tempswa\else
   \ifch@put@vfinal{%
-      \parbox{.5\textwidth}{\ABNTEXfontereduzida\MakeUppercase{\imprimirversaofinal}}%
+    \parbox{.5\textwidth}{\ABNTEXfontereduzida\MakeUppercase{\imprimirversaofinal}}%
   }%
 \fi
 }% fim de \ifch@smashed@parbox
